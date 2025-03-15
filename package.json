@@ -2,7 +2,10 @@
   "name": "hobby-time",
   "version": "1.0.0",
   "main": "index.js",
+  "homepage": "https://ayu0819.github.io/time-table-app-html",
   "scripts": {
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build",
     "test": "echo \"Error: no test specified\" && exit 1",
     "scss": "sass styles.scss:styles.css --watch",
     "build": "sass styles.scss:styles.css"
@@ -14,5 +17,8 @@
   "dependencies": {
     "html2canvas": "^1.4.1",
     "sass": "^1.85.1"
+  },
+  "devDependencies": {
+    "gh-pages": "^6.3.0"
   }
 }
