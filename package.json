@@ -8,7 +8,7 @@
     "deploy": "gh-pages -d . -r git@github.com:ayu0819/time-table-app-html.git",
     "test": "echo \"Error: no test specified\" && exit 1",
     "scss": "sass styles.scss:styles.css --watch",
-    "build": "sass styles.scss:styles.css"
+    "build": "sass styles.scss:styles.css && node generate-ogp.js"
   },
   "keywords": [],
   "author": "",
@@ -19,6 +19,7 @@
     "sass": "^1.85.1"
   },
   "devDependencies": {
-    "gh-pages": "^6.3.0"
+    "gh-pages": "^6.3.0",
+    "puppeteer": "^24.4.0"
   }
 }
