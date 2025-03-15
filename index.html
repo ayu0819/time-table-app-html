@@ -13,6 +13,7 @@
     <title>Event Timetable</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
     <div class="container">
@@ -42,7 +43,6 @@
         <p class="note"><i class="fas fa-info-circle"></i> If you make a comment in advance, we will adjust the time.</p>
         <button id="download-image" class="download-btn"><i class="fas fa-download"></i> Download as Image</button>
     </div>
-    <script src="node_modules/html2canvas/dist/html2canvas.min.js"></script>
     <script>
         document.getElementById('download-image').addEventListener('click', async function() {
             try {
