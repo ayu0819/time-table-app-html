@@ -1,0 +1,204 @@
+// Variables
+$color-bg: #fef6f6;
+$color-present: #a8e6cf;
+$color-absent: #ffd3b6;
+$color-enrollment: #ffaaa5;
+$color-text: #4a4a4a;
+$border-radius: 12px;
+
+@use "sass:color";
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: $color-bg;
+    line-height: 1.6;
+    padding: 20px;
+    overflow-x: hidden;
+}
+
+.container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 30px;
+    background: white;
+    border-radius: $border-radius;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    animation: fadeIn 0.6s ease-out;
+}
+
+.title {
+    text-align: center;
+    color: $color-text;
+    margin-bottom: 30px;
+    font-size: 2rem;
+    text-decoration: underline;
+    text-decoration-color: #ffaaa5;
+    text-decoration-thickness: 4px;
+    text-underline-offset: 8px;
+}
+
+.timetable {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.timetable-item {
+    display: flex;
+    align-items: center;
+    padding: 15px 20px;
+    border-radius: $border-radius;
+    transition: transform 0.2s ease;
+    opacity: 0;
+    animation: fadeIn 0.5s ease-out forwards;
+
+    @for $i from 1 through 5 {
+        &:nth-child(#{$i}) {
+            animation-delay: #{$i * 0.1}s;
+        }
+    }
+
+    &:hover {
+        transform: translateX(10px);
+    }
+
+    .time {
+        font-weight: bold;
+        min-width: 140px;
+    }
+
+    .status {
+        margin-left: 10px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        i {
+            font-size: 1.2em;
+        }
+    }
+
+    &.present {
+        background-color: $color-present;
+        border-left: 6px solid color.adjust($color-present, $lightness: -20%);
+
+        i {
+            color: color.adjust($color-present, $lightness: -30%);
+        }
+    }
+
+    &.absent {
+        background-color: $color-absent;
+        border-left: 6px solid color.adjust($color-absent, $lightness: -20%);
+
+        i {
+            color: color.adjust($color-absent, $lightness: -30%);
+        }
+    }
+
+    &.enrollment {
+        background-color: $color-enrollment;
+        border-left: 6px solid color.adjust($color-enrollment, $lightness: -20%);
+
+        i {
+            color: color.adjust($color-enrollment, $lightness: -30%);
+        }
+    }
+
+    &.leaving {
+        background-color: color.adjust($color-enrollment, $lightness: 10%);
+        border-left: 6px solid $color-enrollment;
+
+        i {
+            color: color.adjust($color-enrollment, $lightness: -20%);
+        }
+    }
+}
+
+.download-btn {
+    display: block;
+    margin: 30px auto 0;
+    padding: 12px 24px;
+    background-color: $color-present;
+    border: none;
+    border-radius: $border-radius;
+    color: color.adjust($color-present, $lightness: -40%);
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    animation: fadeIn 0.5s ease-out 1s both;
+
+    i {
+        font-size: 1.1em;
+    }
+
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    &:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+}
+
+.note {
+    margin-top: 30px;
+    text-align: center;
+    font-style: italic;
+    color: color.adjust($color-text, $lightness: 20%);
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.03);
+    border-radius: $border-radius;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    animation: fadeIn 0.5s ease-out 0.8s both;
+
+    i {
+        color: color.adjust($color-text, $lightness: 10%);
+    }
+}
+
+// Media query for mobile devices
+@media (max-width: 480px) {
+    .container {
+        padding: 15px;
+    }
+
+    .timetable-item {
+        flex-direction: column;
+        align-items: flex-start;
+        
+        .time {
+            margin-bottom: 5px;
+        }
+        
+        .status {
+            margin-left: 0;
+        }
+    }
+}
