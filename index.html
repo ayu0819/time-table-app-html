@@ -71,11 +71,6 @@
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script>
         window.addEventListener('load', function() {
-            if (typeof html2canvas === 'undefined') {
-                console.error('html2canvas not loaded');
-                return;
-            }
-
             document.getElementById('download-image').addEventListener('click', async function() {
                 const button = this;
                 const originalText = button.innerHTML;
@@ -86,34 +81,40 @@
                     // Wait for fonts to load
                     await document.fonts.ready;
                     
-                    // Get the timetable and create a new container for capture
-                    const timetable = document.getElementById('timetable');
-                    const title = document.querySelector('.title').cloneNode(true);
+                    // Get the original container
+                    const originalContainer = document.querySelector('.container');
                     
-                    const captureContainer = document.createElement('div');
-                    captureContainer.className = 'capture-container';
-                    captureContainer.style.position = 'fixed';
-                    captureContainer.style.left = '-9999px';
-                    captureContainer.style.top = '0';
+                    // Create a temporary capture area
+                    const captureArea = document.createElement('div');
+                    captureArea.style.position = 'fixed';
+                    captureArea.style.left = '-9999px';
+                    captureArea.style.top = '0';
+                    captureArea.style.width = originalContainer.offsetWidth + 'px';
+                    captureArea.style.background = '#fef6f6';
+                    captureArea.style.padding = '40px';
+                    document.body.appendChild(captureArea);
                     
-                    // Add title and timetable to capture container
-                    captureContainer.appendChild(title);
-                    captureContainer.appendChild(timetable.cloneNode(true));
-                    document.body.appendChild(captureContainer);
+                    // Clone the content we want to capture
+                    const clone = originalContainer.cloneNode(true);
+                    clone.style.background = '#fef6f6';
+                    clone.style.position = 'static';
+                    clone.style.transform = 'none';
+                    clone.style.boxShadow = 'none';
                     
-                    // Apply styles to ensure visibility
-                    const captureItems = captureContainer.getElementsByClassName('timetable-item');
-                    Array.from(captureItems).forEach(item => {
+                    // Remove download button from clone
+                    const downloadBtn = clone.querySelector('.download-btn');
+                    const note = clone.querySelector('.note');
+                    if (downloadBtn) downloadBtn.remove();
+                    if (note) note.remove();
+                    
+                    // Apply styles to timetable items
+                    const items = clone.getElementsByClassName('timetable-item');
+                    Array.from(items).forEach(item => {
                         item.style.opacity = '1';
-                        item.style.transform = 'none';
                         item.style.animation = 'none';
-                        item.style.display = 'flex';
-                        item.style.alignItems = 'center';
-                        item.style.padding = '15px 20px';
-                        item.style.marginBottom = '15px';
-                        item.style.borderRadius = '12px';
+                        item.style.transform = 'none';
                         
-                        // Set background colors explicitly
+                        // Set explicit background colors and styles
                         if (item.classList.contains('present')) {
                             item.style.backgroundColor = '#a8e6cf';
                             item.style.borderLeft = '6px solid #86d4b9';
@@ -127,37 +128,50 @@
                             item.style.backgroundColor = '#ffbfbc';
                             item.style.borderLeft = '6px solid #ffaaa5';
                         }
+                        
+                        // Ensure layout styles
+                        item.style.display = 'flex';
+                        item.style.alignItems = 'center';
+                        item.style.padding = '15px 20px';
+                        item.style.marginBottom = '15px';
+                        item.style.borderRadius = '12px';
                     });
-
-                    try {
-                        // Capture the image
-                        const canvas = await html2canvas(captureContainer, {
-                            scale: 2,
-                            useCORS: true,
-                            allowTaint: true,
-                            backgroundColor: '#fef6f6',
-                            onclone: function(clonedDoc) {
-                                const clonedElement = clonedDoc.querySelector('.capture-container');
-                                clonedElement.style.visibility = 'visible';
+                    
+                    captureArea.appendChild(clone);
+                    
+                    // Wait a moment for styles to apply
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                    
+                    const canvas = await html2canvas(clone, {
+                        backgroundColor: '#fef6f6',
+                        scale: 2,
+                        logging: true,
+                        useCORS: true,
+                        allowTaint: true,
+                        removeContainer: true,
+                        onclone: function(clonedDoc) {
+                            const clonedElement = clonedDoc.querySelector('.container');
+                            if (clonedElement) {
+                                clonedElement.style.background = '#fef6f6';
                                 clonedElement.style.position = 'static';
+                                clonedElement.style.transform = 'none';
                             }
-                        });
-
-                        // Download the image
-                        canvas.toBlob(function(blob) {
-                            const url = URL.createObjectURL(blob);
-                            const link = document.createElement('a');
-                            link.download = 'timetable.png';
-                            link.href = url;
-                            document.body.appendChild(link);
-                            link.click();
-                            document.body.removeChild(link);
-                            URL.revokeObjectURL(url);
-                        }, 'image/png');
-
-                    } finally {
-                        document.body.removeChild(captureContainer);
-                    }
+                        }
+                    });
+                    
+                    // Create download link
+                    canvas.toBlob(function(blob) {
+                        const url = URL.createObjectURL(blob);
+                        const link = document.createElement('a');
+                        link.download = 'timetable.png';
+                        link.href = url;
+                        link.click();
+                        URL.revokeObjectURL(url);
+                    }, 'image/png');
+                    
+                    // Clean up
+                    document.body.removeChild(captureArea);
+                    
                 } catch (error) {
                     console.error('Error generating image:', error);
                     alert('Failed to generate image. Please try again.');
