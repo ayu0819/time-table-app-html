@@ -49,32 +49,38 @@
                 // Wait for fonts to load
                 await document.fonts.ready;
                 
-                const timetableElement = document.getElementById('timetable');
+                // Create a containing div for proper styling
                 const container = document.createElement('div');
-                container.style.padding = '40px';
-                container.style.width = '800px';
-                container.style.backgroundColor = '#ffffff';
-                container.style.borderRadius = '16px';
-                container.style.boxShadow = '0 8px 32px rgba(0, 0, 0, 0.1)';
                 container.style.position = 'fixed';
                 container.style.left = '-9999px';
                 container.style.top = '0';
+                container.style.padding = '40px';
+                container.style.backgroundColor = '#fef6f6';
+                container.style.borderRadius = '16px';
+                container.style.width = '800px';
                 
-                // Create and add title
+                // Add title
                 const title = document.createElement('h1');
                 title.className = 'title';
                 title.textContent = 'Creative Event Schedule';
+                title.style.textAlign = 'center';
+                title.style.marginBottom = '30px';
                 container.appendChild(title);
                 
                 // Clone the timetable
-                const timetableClone = timetableElement.cloneNode(true);
+                const timetableClone = document.getElementById('timetable').cloneNode(true);
                 
-                // Remove animations from cloned elements
+                // Ensure all items are visible and styled properly
                 const items = timetableClone.getElementsByClassName('timetable-item');
                 for (let item of items) {
                     item.style.opacity = '1';
                     item.style.animation = 'none';
                     item.style.transform = 'none';
+                    item.style.display = 'flex';
+                    item.style.alignItems = 'center';
+                    item.style.padding = '15px 20px';
+                    item.style.marginBottom = '15px';
+                    item.style.borderRadius = '12px';
                 }
                 
                 container.appendChild(timetableClone);
@@ -82,26 +88,42 @@
                 
                 try {
                     const canvas = await html2canvas(container, {
-                        backgroundColor: '#ffffff',
+                        backgroundColor: '#fef6f6',
                         scale: 2,
                         useCORS: true,
                         logging: false,
                         onclone: function(clonedDoc) {
-                            const styles = document.styleSheets;
-                            for (let style of styles) {
-                                if (style.href && style.href.includes('font-awesome')) {
-                                    const newLink = clonedDoc.createElement('link');
-                                    newLink.rel = 'stylesheet';
-                                    newLink.href = style.href;
-                                    clonedDoc.head.appendChild(newLink);
+                            // Copy all styles
+                            const originalStyles = document.styleSheets;
+                            for (let styleSheet of originalStyles) {
+                                if (styleSheet.href) {
+                                    const link = clonedDoc.createElement('link');
+                                    link.rel = 'stylesheet';
+                                    link.href = styleSheet.href;
+                                    clonedDoc.head.appendChild(link);
                                 }
                             }
                         }
                     });
                     
+                    // Create a new canvas with padding
+                    const finalCanvas = document.createElement('canvas');
+                    const padding = 40;
+                    finalCanvas.width = canvas.width + (padding * 2);
+                    finalCanvas.height = canvas.height + (padding * 2);
+                    const ctx = finalCanvas.getContext('2d');
+                    
+                    // Fill background
+                    ctx.fillStyle = '#fef6f6';
+                    ctx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
+                    
+                    // Draw original canvas with padding
+                    ctx.drawImage(canvas, padding, padding);
+                    
+                    // Download the image
                     const link = document.createElement('a');
                     link.download = 'timetable.png';
-                    link.href = canvas.toDataURL('image/png');
+                    link.href = finalCanvas.toDataURL('image/png');
                     link.click();
                 } finally {
                     document.body.removeChild(container);
