@@ -30,6 +30,14 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        .capture-container {
+            background: #fef6f6;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            width: 600px;
+            margin: 0 auto;
+        }
     </style>
 </head>
 <body>
@@ -60,7 +68,7 @@
         <p class="note"><i class="fas fa-info-circle"></i> If you make a comment in advance, we will adjust the time.</p>
         <button id="download-image" class="download-btn"><i class="fas fa-download"></i> Download as Image</button>
     </div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script>
         window.addEventListener('load', function() {
             if (typeof html2canvas === 'undefined') {
@@ -75,78 +83,81 @@
                     button.disabled = true;
                     button.innerHTML = '<i class="fas fa-circle-notch spinner"></i> Generating...';
 
-                    // Wait for fonts and styles to be loaded
+                    // Wait for fonts to load
                     await document.fonts.ready;
-                    await new Promise(resolve => setTimeout(resolve, 500));
-
-                    // Create a clone of the container for capturing
-                    const container = document.querySelector('.container');
-                    const clone = container.cloneNode(true);
                     
-                    // Apply necessary styles to the clone
-                    clone.style.position = 'fixed';
-                    clone.style.left = '-9999px';
-                    clone.style.top = '0';
-                    clone.style.width = '600px';
-                    clone.style.background = '#fef6f6';
-                    clone.style.padding = '40px';
-                    clone.style.borderRadius = '16px';
-                    clone.style.boxShadow = '0 8px 32px rgba(0, 0, 0, 0.1)';
+                    // Get the timetable and create a new container for capture
+                    const timetable = document.getElementById('timetable');
+                    const title = document.querySelector('.title').cloneNode(true);
                     
-                    // Apply styles to timetable items in clone
-                    const items = clone.getElementsByClassName('timetable-item');
-                    Array.from(items).forEach(item => {
+                    const captureContainer = document.createElement('div');
+                    captureContainer.className = 'capture-container';
+                    captureContainer.style.position = 'fixed';
+                    captureContainer.style.left = '-9999px';
+                    captureContainer.style.top = '0';
+                    
+                    // Add title and timetable to capture container
+                    captureContainer.appendChild(title);
+                    captureContainer.appendChild(timetable.cloneNode(true));
+                    document.body.appendChild(captureContainer);
+                    
+                    // Apply styles to ensure visibility
+                    const captureItems = captureContainer.getElementsByClassName('timetable-item');
+                    Array.from(captureItems).forEach(item => {
                         item.style.opacity = '1';
-                        item.style.animation = 'none';
                         item.style.transform = 'none';
-                        if (item.classList.contains('present')) {
-                            item.style.backgroundColor = '#a8e6cf';
-                        } else if (item.classList.contains('absent')) {
-                            item.style.backgroundColor = '#ffd3b6';
-                        } else if (item.classList.contains('enrollment')) {
-                            item.style.backgroundColor = '#ffaaa5';
-                        } else if (item.classList.contains('leaving')) {
-                            item.style.backgroundColor = '#ffbfbc';
-                        }
+                        item.style.animation = 'none';
                         item.style.display = 'flex';
                         item.style.alignItems = 'center';
                         item.style.padding = '15px 20px';
                         item.style.marginBottom = '15px';
                         item.style.borderRadius = '12px';
+                        
+                        // Set background colors explicitly
+                        if (item.classList.contains('present')) {
+                            item.style.backgroundColor = '#a8e6cf';
+                            item.style.borderLeft = '6px solid #86d4b9';
+                        } else if (item.classList.contains('absent')) {
+                            item.style.backgroundColor = '#ffd3b6';
+                            item.style.borderLeft = '6px solid #ffb088';
+                        } else if (item.classList.contains('enrollment')) {
+                            item.style.backgroundColor = '#ffaaa5';
+                            item.style.borderLeft = '6px solid #ff8882';
+                        } else if (item.classList.contains('leaving')) {
+                            item.style.backgroundColor = '#ffbfbc';
+                            item.style.borderLeft = '6px solid #ffaaa5';
+                        }
                     });
-                    
-                    // Add clone to document for capturing
-                    document.body.appendChild(clone);
-                    
+
                     try {
-                        const canvas = await html2canvas(clone, {
+                        // Capture the image
+                        const canvas = await html2canvas(captureContainer, {
                             scale: 2,
-                            backgroundColor: '#fef6f6',
-                            logging: true,
                             useCORS: true,
                             allowTaint: true,
+                            backgroundColor: '#fef6f6',
                             onclone: function(clonedDoc) {
-                                const clonedElement = clonedDoc.querySelector('.container');
-                                // Ensure all styles are applied in the cloned document
-                                const computedStyle = window.getComputedStyle(container);
-                                for (const prop of computedStyle) {
-                                    clonedElement.style[prop] = computedStyle.getPropertyValue(prop);
-                                }
+                                const clonedElement = clonedDoc.querySelector('.capture-container');
+                                clonedElement.style.visibility = 'visible';
+                                clonedElement.style.position = 'static';
                             }
                         });
 
-                        // Create download link
-                        const image = canvas.toDataURL('image/png');
-                        const link = document.createElement('a');
-                        link.href = image;
-                        link.download = 'timetable.png';
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
+                        // Download the image
+                        canvas.toBlob(function(blob) {
+                            const url = URL.createObjectURL(blob);
+                            const link = document.createElement('a');
+                            link.download = 'timetable.png';
+                            link.href = url;
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+                            URL.revokeObjectURL(url);
+                        }, 'image/png');
+
                     } finally {
-                        document.body.removeChild(clone);
+                        document.body.removeChild(captureContainer);
                     }
-                    
                 } catch (error) {
                     console.error('Error generating image:', error);
                     alert('Failed to generate image. Please try again.');
