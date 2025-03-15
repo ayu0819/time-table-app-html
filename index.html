@@ -63,7 +63,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script>
         window.addEventListener('load', function() {
-            // Ensure html2canvas is loaded
             if (typeof html2canvas === 'undefined') {
                 console.error('html2canvas not loaded');
                 return;
@@ -73,34 +72,80 @@
                 const button = this;
                 const originalText = button.innerHTML;
                 try {
-                    // Visual feedback
                     button.disabled = true;
                     button.innerHTML = '<i class="fas fa-circle-notch spinner"></i> Generating...';
 
-                    // Wait for fonts to load
+                    // Wait for fonts and styles to be loaded
                     await document.fonts.ready;
+                    await new Promise(resolve => setTimeout(resolve, 500));
+
+                    // Create a clone of the container for capturing
+                    const container = document.querySelector('.container');
+                    const clone = container.cloneNode(true);
                     
-                    // Get the container element
-                    const element = document.querySelector('.container');
-                    element.style.background = '#fef6f6';
+                    // Apply necessary styles to the clone
+                    clone.style.position = 'fixed';
+                    clone.style.left = '-9999px';
+                    clone.style.top = '0';
+                    clone.style.width = '600px';
+                    clone.style.background = '#fef6f6';
+                    clone.style.padding = '40px';
+                    clone.style.borderRadius = '16px';
+                    clone.style.boxShadow = '0 8px 32px rgba(0, 0, 0, 0.1)';
                     
-                    // Take screenshot
-                    const canvas = await html2canvas(element, {
-                        scale: 2,
-                        backgroundColor: '#fef6f6',
-                        logging: true,
-                        useCORS: true,
-                        allowTaint: true
+                    // Apply styles to timetable items in clone
+                    const items = clone.getElementsByClassName('timetable-item');
+                    Array.from(items).forEach(item => {
+                        item.style.opacity = '1';
+                        item.style.animation = 'none';
+                        item.style.transform = 'none';
+                        if (item.classList.contains('present')) {
+                            item.style.backgroundColor = '#a8e6cf';
+                        } else if (item.classList.contains('absent')) {
+                            item.style.backgroundColor = '#ffd3b6';
+                        } else if (item.classList.contains('enrollment')) {
+                            item.style.backgroundColor = '#ffaaa5';
+                        } else if (item.classList.contains('leaving')) {
+                            item.style.backgroundColor = '#ffbfbc';
+                        }
+                        item.style.display = 'flex';
+                        item.style.alignItems = 'center';
+                        item.style.padding = '15px 20px';
+                        item.style.marginBottom = '15px';
+                        item.style.borderRadius = '12px';
                     });
                     
-                    // Create download link
-                    const image = canvas.toDataURL('image/png');
-                    const link = document.createElement('a');
-                    link.href = image;
-                    link.download = 'timetable.png';
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
+                    // Add clone to document for capturing
+                    document.body.appendChild(clone);
+                    
+                    try {
+                        const canvas = await html2canvas(clone, {
+                            scale: 2,
+                            backgroundColor: '#fef6f6',
+                            logging: true,
+                            useCORS: true,
+                            allowTaint: true,
+                            onclone: function(clonedDoc) {
+                                const clonedElement = clonedDoc.querySelector('.container');
+                                // Ensure all styles are applied in the cloned document
+                                const computedStyle = window.getComputedStyle(container);
+                                for (const prop of computedStyle) {
+                                    clonedElement.style[prop] = computedStyle.getPropertyValue(prop);
+                                }
+                            }
+                        });
+
+                        // Create download link
+                        const image = canvas.toDataURL('image/png');
+                        const link = document.createElement('a');
+                        link.href = image;
+                        link.download = 'timetable.png';
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                    } finally {
+                        document.body.removeChild(clone);
+                    }
                     
                 } catch (error) {
                     console.error('Error generating image:', error);
