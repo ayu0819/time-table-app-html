@@ -13,7 +13,6 @@
     <title>Event Timetable</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         .download-btn[disabled] {
             opacity: 0.7;
@@ -61,50 +60,56 @@
         <p class="note"><i class="fas fa-info-circle"></i> If you make a comment in advance, we will adjust the time.</p>
         <button id="download-image" class="download-btn"><i class="fas fa-download"></i> Download as Image</button>
     </div>
-    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script>
-        document.getElementById('download-image').addEventListener('click', async function() {
-            const button = this;
-            const originalText = button.innerHTML;
-            try {
-                button.disabled = true;
-                button.innerHTML = '<i class="fas fa-circle-notch spinner"></i> Generating...';
+        window.addEventListener('load', function() {
+            // Ensure html2canvas is loaded
+            if (typeof html2canvas === 'undefined') {
+                console.error('html2canvas not loaded');
+                return;
+            }
 
-                // Wait for fonts to load
-                await document.fonts.ready;
-                
-                const element = document.querySelector('.container');
-                
-                // Configure html2canvas with optimized settings
-                const canvas = await html2canvas(element, {
-                    backgroundColor: '#fef6f6',
-                    scale: 2,
-                    useCORS: true,
-                    logging: false,
-                    removeContainer: true,
-                    allowTaint: true,
-                    foreignObjectRendering: true
-                });
+            document.getElementById('download-image').addEventListener('click', async function() {
+                const button = this;
+                const originalText = button.innerHTML;
+                try {
+                    // Visual feedback
+                    button.disabled = true;
+                    button.innerHTML = '<i class="fas fa-circle-notch spinner"></i> Generating...';
 
-                // Convert to blob for better memory handling
-                canvas.toBlob(function(blob) {
-                    const url = URL.createObjectURL(blob);
+                    // Wait for fonts to load
+                    await document.fonts.ready;
+                    
+                    // Get the container element
+                    const element = document.querySelector('.container');
+                    element.style.background = '#fef6f6';
+                    
+                    // Take screenshot
+                    const canvas = await html2canvas(element, {
+                        scale: 2,
+                        backgroundColor: '#fef6f6',
+                        logging: true,
+                        useCORS: true,
+                        allowTaint: true
+                    });
+                    
+                    // Create download link
+                    const image = canvas.toDataURL('image/png');
                     const link = document.createElement('a');
+                    link.href = image;
                     link.download = 'timetable.png';
-                    link.href = url;
                     document.body.appendChild(link);
                     link.click();
                     document.body.removeChild(link);
-                    URL.revokeObjectURL(url);
-                }, 'image/png');
-
-            } catch (error) {
-                console.error('Error generating image:', error);
-                alert('Failed to generate image. Please try again.');
-            } finally {
-                button.disabled = false;
-                button.innerHTML = originalText;
-            }
+                    
+                } catch (error) {
+                    console.error('Error generating image:', error);
+                    alert('Failed to generate image. Please try again.');
+                } finally {
+                    button.disabled = false;
+                    button.innerHTML = originalText;
+                }
+            });
         });
     </script>
 </body>
