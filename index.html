@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta property="og:title" content="Event Timetable">
+    <meta property="og:description" content="Check my availability for the creative event">
+    <meta property="og:image" content="./timetable-og.png">
+    <meta property="og:type" content="website">
+    <meta property="twitter:card" content="summary_large_image">
+    <title>Event Timetable</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">Creative Event Schedule</h1>
+        <div class="timetable" id="timetable">
+            <div class="timetable-item absent">
+                <span class="time">10:00 - 10:30</span>
+                <span class="status"><i class="fas fa-times-circle"></i> Absent</span>
+            </div>
+            <div class="timetable-item present">
+                <span class="time">10:30 - 12:00</span>
+                <span class="status"><i class="fas fa-check-circle"></i> Present</span>
+            </div>
+            <div class="timetable-item absent">
+                <span class="time">12:00 - 13:00</span>
+                <span class="status"><i class="fas fa-times-circle"></i> Absent</span>
+            </div>
+            <div class="timetable-item enrollment">
+                <span class="time">13:00 - 13:30</span>
+                <span class="status"><i class="fas fa-user-plus"></i> Enrollment</span>
+            </div>
+            <div class="timetable-item leaving">
+                <span class="time">13:30</span>
+                <span class="status"><i class="fas fa-sign-out-alt"></i> Scheduled to leave</span>
+            </div>
+        </div>
+        <p class="note"><i class="fas fa-info-circle"></i> If you make a comment in advance, we will adjust the time.</p>
+        <button id="download-image" class="download-btn"><i class="fas fa-download"></i> Download as Image</button>
+    </div>
+    <script src="node_modules/html2canvas/dist/html2canvas.min.js"></script>
+    <script>
+        function copyStyles(sourceElement, targetElement) {
+            const computedStyle = window.getComputedStyle(sourceElement);
+            for (const property of computedStyle) {
+                targetElement.style[property] = computedStyle.getPropertyValue(property);
+            }
+
+            for (let i = 0; i < sourceElement.children.length; i++) {
+                if (targetElement.children[i]) {
+                    copyStyles(sourceElement.children[i], targetElement.children[i]);
+                }
+            }
+        }
+
+        document.getElementById('download-image').addEventListener('click', async function() {
+            const timetableElement = document.getElementById('timetable');
+            
+            // Create a temporary container for the image
+            const container = document.createElement('div');
+            container.style.padding = '40px';
+            container.style.background = 'linear-gradient(135deg, #fef6f6 0%, #fff 100%)';
+            container.style.borderRadius = '16px';
+            container.style.boxShadow = '0 8px 32px rgba(0, 0, 0, 0.1)';
+            container.style.width = timetableElement.offsetWidth + 80 + 'px';
+            container.style.position = 'fixed';
+            container.style.left = '-9999px';
+            container.style.top = '0';
+            
+            // Add a decorative element
+            const decorator = document.createElement('div');
+            decorator.style.position = 'absolute';
+            decorator.style.top = '20px';
+            decorator.style.right = '20px';
+            decorator.style.width = '100px';
+            decorator.style.height = '100px';
+            decorator.style.background = 'radial-gradient(circle, rgba(168, 230, 207, 0.2) 0%, rgba(255, 170, 165, 0.1) 100%)';
+            decorator.style.borderRadius = '50%';
+            decorator.style.filter = 'blur(20px)';
+            container.appendChild(decorator);
+            
+            // Clone the timetable and copy styles
+            const timetableClone = timetableElement.cloneNode(true);
+            copyStyles(timetableElement, timetableClone);
+            container.appendChild(timetableClone);
+            document.body.appendChild(container);
+            
+            try {
+                // Wait for fonts to load
+                await document.fonts.ready;
+                
+                // Add a small delay to ensure styles are applied
+                await new Promise(resolve => setTimeout(resolve, 100));
+                
+                const canvas = await html2canvas(container, {
+                    backgroundColor: null,
+                    scale: 2,
+                    useCORS: true,
+                    logging: false,
+                    imageTimeout: 0,
+                    onclone: function(clonedDoc) {
+                        const clonedElement = clonedDoc.getElementById('timetable');
+                        if (clonedElement) {
+                            copyStyles(timetableElement, clonedElement);
+                        }
+                    }
+                });
+                
+                const link = document.createElement('a');
+                link.download = 'timetable.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            } finally {
+                // Clean up
+                document.body.removeChild(container);
+            }
+        });
+    </script>
+</body>
+</html>
