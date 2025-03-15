@@ -7,9 +7,20 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { margin: 0; background: transparent; }
-        .container { padding: 40px; width: 1200px; height: 630px; background: linear-gradient(135deg, #fef6f6 0%, #fff 100%); }
+        body { margin: 0; padding: 20px; background: transparent; }
+        .container { 
+            padding: 40px;
+            width: 1200px;
+            height: 630px;
+            background: linear-gradient(135deg, #fef6f6 0%, #fff 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
         .title { font-size: 48px; margin-bottom: 40px; }
+        .timetable { width: 800px; }
+        .timetable-item { opacity: 1 !important; animation: none !important; }
     </style>
 </head>
 <body>
@@ -40,22 +51,42 @@
     </div>
     <script src="node_modules/html2canvas/dist/html2canvas.min.js"></script>
     <script>
-        window.onload = async function() {
-            await document.fonts.ready;
-            const canvas = await html2canvas(document.querySelector('.container'), {
-                width: 1200,
-                height: 630,
-                scale: 1,
-                useCORS: true,
-                backgroundColor: null
-            });
-            
-            // Convert to image and download
-            const link = document.createElement('a');
-            link.download = 'timetable-og.png';
-            link.href = canvas.toDataURL('image/png');
-            link.click();
-        };
+        async function generateImage() {
+            try {
+                // Wait for fonts and styles to load
+                await document.fonts.ready;
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                const canvas = await html2canvas(document.querySelector('.container'), {
+                    width: 1200,
+                    height: 630,
+                    scale: 2,
+                    useCORS: true,
+                    backgroundColor: null,
+                    onclone: function(clonedDoc) {
+                        const styles = document.styleSheets;
+                        for (let style of styles) {
+                            if (style.href && style.href.includes('font-awesome')) {
+                                const newLink = clonedDoc.createElement('link');
+                                newLink.rel = 'stylesheet';
+                                newLink.href = style.href;
+                                clonedDoc.head.appendChild(newLink);
+                            }
+                        }
+                    }
+                });
+                
+                const link = document.createElement('a');
+                link.download = 'timetable-og.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            } catch (error) {
+                console.error('Error generating image:', error);
+            }
+        }
+
+        // Generate image when page loads
+        window.onload = generateImage;
     </script>
 </body>
 </html>

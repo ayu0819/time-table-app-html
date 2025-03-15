@@ -44,79 +44,70 @@
     </div>
     <script src="node_modules/html2canvas/dist/html2canvas.min.js"></script>
     <script>
-        function copyStyles(sourceElement, targetElement) {
-            const computedStyle = window.getComputedStyle(sourceElement);
-            for (const property of computedStyle) {
-                targetElement.style[property] = computedStyle.getPropertyValue(property);
-            }
-
-            for (let i = 0; i < sourceElement.children.length; i++) {
-                if (targetElement.children[i]) {
-                    copyStyles(sourceElement.children[i], targetElement.children[i]);
-                }
-            }
-        }
-
         document.getElementById('download-image').addEventListener('click', async function() {
-            const timetableElement = document.getElementById('timetable');
-            
-            // Create a temporary container for the image
-            const container = document.createElement('div');
-            container.style.padding = '40px';
-            container.style.background = 'linear-gradient(135deg, #fef6f6 0%, #fff 100%)';
-            container.style.borderRadius = '16px';
-            container.style.boxShadow = '0 8px 32px rgba(0, 0, 0, 0.1)';
-            container.style.width = timetableElement.offsetWidth + 80 + 'px';
-            container.style.position = 'fixed';
-            container.style.left = '-9999px';
-            container.style.top = '0';
-            
-            // Add a decorative element
-            const decorator = document.createElement('div');
-            decorator.style.position = 'absolute';
-            decorator.style.top = '20px';
-            decorator.style.right = '20px';
-            decorator.style.width = '100px';
-            decorator.style.height = '100px';
-            decorator.style.background = 'radial-gradient(circle, rgba(168, 230, 207, 0.2) 0%, rgba(255, 170, 165, 0.1) 100%)';
-            decorator.style.borderRadius = '50%';
-            decorator.style.filter = 'blur(20px)';
-            container.appendChild(decorator);
-            
-            // Clone the timetable and copy styles
-            const timetableClone = timetableElement.cloneNode(true);
-            copyStyles(timetableElement, timetableClone);
-            container.appendChild(timetableClone);
-            document.body.appendChild(container);
-            
             try {
                 // Wait for fonts to load
                 await document.fonts.ready;
                 
-                // Add a small delay to ensure styles are applied
-                await new Promise(resolve => setTimeout(resolve, 100));
+                const timetableElement = document.getElementById('timetable');
+                const container = document.createElement('div');
+                container.style.padding = '40px';
+                container.style.width = '800px';
+                container.style.background = 'linear-gradient(135deg, #fef6f6 0%, #fff 100%)';
+                container.style.borderRadius = '16px';
+                container.style.boxShadow = '0 8px 32px rgba(0, 0, 0, 0.1)';
+                container.style.position = 'fixed';
+                container.style.left = '-9999px';
+                container.style.top = '0';
                 
-                const canvas = await html2canvas(container, {
-                    backgroundColor: null,
-                    scale: 2,
-                    useCORS: true,
-                    logging: false,
-                    imageTimeout: 0,
-                    onclone: function(clonedDoc) {
-                        const clonedElement = clonedDoc.getElementById('timetable');
-                        if (clonedElement) {
-                            copyStyles(timetableElement, clonedElement);
+                // Create and add title
+                const title = document.createElement('h1');
+                title.className = 'title';
+                title.textContent = 'Creative Event Schedule';
+                container.appendChild(title);
+                
+                // Clone the timetable
+                const timetableClone = timetableElement.cloneNode(true);
+                
+                // Remove animations from cloned elements
+                const items = timetableClone.getElementsByClassName('timetable-item');
+                for (let item of items) {
+                    item.style.opacity = '1';
+                    item.style.animation = 'none';
+                    item.style.transform = 'none';
+                }
+                
+                container.appendChild(timetableClone);
+                document.body.appendChild(container);
+                
+                try {
+                    const canvas = await html2canvas(container, {
+                        backgroundColor: null,
+                        scale: 2,
+                        useCORS: true,
+                        logging: false,
+                        onclone: function(clonedDoc) {
+                            const styles = document.styleSheets;
+                            for (let style of styles) {
+                                if (style.href && style.href.includes('font-awesome')) {
+                                    const newLink = clonedDoc.createElement('link');
+                                    newLink.rel = 'stylesheet';
+                                    newLink.href = style.href;
+                                    clonedDoc.head.appendChild(newLink);
+                                }
+                            }
                         }
-                    }
-                });
-                
-                const link = document.createElement('a');
-                link.download = 'timetable.png';
-                link.href = canvas.toDataURL('image/png');
-                link.click();
-            } finally {
-                // Clean up
-                document.body.removeChild(container);
+                    });
+                    
+                    const link = document.createElement('a');
+                    link.download = 'timetable.png';
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                } finally {
+                    document.body.removeChild(container);
+                }
+            } catch (error) {
+                console.error('Error generating image:', error);
             }
         });
     </script>
