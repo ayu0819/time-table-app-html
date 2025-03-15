@@ -1,3 +1,4 @@
+@charset "UTF-8";
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -103,19 +104,19 @@ body {
 .timetable-item.absent i {
   color: rgb(255, 118.7808219178, 29);
 }
-.timetable-item.enrollment {
-  background-color: #ffaaa5;
-  border-left: 6px solid rgb(255, 73.6666666667, 63);
+.timetable-item.在籍 {
+  background-color: #a8e6cf;
+  border-left: 6px solid rgb(88.7678571429, 207.2321428571, 163.2857142857);
 }
-.timetable-item.enrollment i {
-  color: rgb(255, 25.5, 12);
+.timetable-item.在籍 i {
+  color: rgb(54.6875, 190.3125, 140);
 }
 .timetable-item.leaving {
-  background-color: rgb(255, 218.1666666667, 216);
-  border-left: 6px solid #ffaaa5;
+  background-color: rgb(207.6160714286, 241.3839285714, 228.8571428571);
+  border-left: 6px solid #a8e6cf;
 }
 .timetable-item.leaving i {
-  color: rgb(255, 73.6666666667, 63);
+  color: rgb(88.7678571429, 207.2321428571, 163.2857142857);
 }
 
 .download-btn {

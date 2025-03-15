@@ -76,7 +76,7 @@ async function generateOGP() {
                     .timetable-item.absent {
                         background-color: #ffd3b6;
                     }
-                    .timetable-item.enrollment {
+                    .timetable-item.present {
                         background-color: #ffaaa5;
                     }
                     .timetable-item.leaving {
@@ -90,23 +90,23 @@ async function generateOGP() {
                     <div class="timetable">
                         <div class="timetable-item absent">
                             <span class="time">10:00 - 10:30</span>
-                            <span class="status"><i class="fas fa-times-circle"></i> Absent</span>
+                            <span class="status"><i class="fas fa-times-circle"></i> 不在</span>
                         </div>
                         <div class="timetable-item present">
                             <span class="time">10:30 - 12:00</span>
-                            <span class="status"><i class="fas fa-check-circle"></i> Present</span>
+                            <span class="status"><i class="fas fa-check-circle"></i> 在籍</span>
                         </div>
                         <div class="timetable-item absent">
                             <span class="time">12:00 - 13:00</span>
-                            <span class="status"><i class="fas fa-times-circle"></i> Absent</span>
+                            <span class="status"><i class="fas fa-times-circle"></i> 不在</span>
                         </div>
-                        <div class="timetable-item enrollment">
+                        <div class="timetable-item present">
                             <span class="time">13:00 - 13:30</span>
-                            <span class="status"><i class="fas fa-user-plus"></i> Enrollment</span>
+                            <span class="status"><i class="fas fa-user-plus"></i> 在籍</span>
                         </div>
                         <div class="timetable-item leaving">
                             <span class="time">13:30</span>
-                            <span class="status"><i class="fas fa-sign-out-alt"></i> Scheduled to leave</span>
+                            <span class="status"><i class="fas fa-sign-out-alt"></i> 撤退準備</span>
                         </div>
                     </div>
                 </div>
