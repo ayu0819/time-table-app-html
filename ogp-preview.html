@@ -7,20 +7,29 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { margin: 0; padding: 20px; background: transparent; }
+        body { 
+            margin: 0; 
+            padding: 20px; 
+            background: #ffffff; 
+        }
         .container { 
             padding: 40px;
             width: 1200px;
             height: 630px;
-            background: linear-gradient(135deg, #fef6f6 0%, #fff 100%);
+            background: #ffffff;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            box-shadow: none;
         }
         .title { font-size: 48px; margin-bottom: 40px; }
         .timetable { width: 800px; }
-        .timetable-item { opacity: 1 !important; animation: none !important; }
+        .timetable-item { 
+            opacity: 1 !important; 
+            animation: none !important;
+            transform: none !important;
+        }
     </style>
 </head>
 <body>
@@ -62,7 +71,7 @@
                     height: 630,
                     scale: 2,
                     useCORS: true,
-                    backgroundColor: null,
+                    backgroundColor: '#ffffff',
                     onclone: function(clonedDoc) {
                         const styles = document.styleSheets;
                         for (let style of styles) {
@@ -76,6 +85,7 @@
                     }
                 });
                 
+                // Save as PNG with white background
                 const link = document.createElement('a');
                 link.download = 'timetable-og.png';
                 link.href = canvas.toDataURL('image/png');

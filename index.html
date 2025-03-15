@@ -53,7 +53,7 @@
                 const container = document.createElement('div');
                 container.style.padding = '40px';
                 container.style.width = '800px';
-                container.style.background = 'linear-gradient(135deg, #fef6f6 0%, #fff 100%)';
+                container.style.backgroundColor = '#ffffff';
                 container.style.borderRadius = '16px';
                 container.style.boxShadow = '0 8px 32px rgba(0, 0, 0, 0.1)';
                 container.style.position = 'fixed';
@@ -82,7 +82,7 @@
                 
                 try {
                     const canvas = await html2canvas(container, {
-                        backgroundColor: null,
+                        backgroundColor: '#ffffff',
                         scale: 2,
                         useCORS: true,
                         logging: false,
